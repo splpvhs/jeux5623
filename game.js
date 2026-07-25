@@ -920,5 +920,8 @@ var gk_isXlsx = false;
         initWelcomeOverlay();
         initNumberGrid();
         initBackgroundMusic();
+document.getElementById('musicToggle').textContent = '▶️';
+document.addEventListener('click', () => startBackgroundMusic(), { once: true });
+document.addEventListener('touchstart', () => startBackgroundMusic(), { once: true });
         document.getElementById('showErrorsBtn').onclick = showErrors;
         updateErrorsBadge();
