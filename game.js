@@ -773,8 +773,15 @@ var gk_isXlsx = false;
             const modalImage = document.getElementById('modalImage');
             const modalClose = imageModal.querySelector('.image-modal-close');
 
-            const openImageModal = (src) => {
-                modalImage.src = src;
+            let modalIndex = 0;
+
+            const showModalImage = (index) => {
+                modalIndex = (index + slides.length) % slides.length;
+                modalImage.src = slides[modalIndex];
+            };
+
+            const openImageModal = (index) => {
+                showModalImage(index);
                 imageModal.classList.add('show');
                 imageModal.setAttribute('aria-hidden', 'false');
             };
@@ -789,6 +796,9 @@ var gk_isXlsx = false;
                 }, 300);
             };
 
+            const modalNext = () => showModalImage(modalIndex + 1);
+            const modalPrev = () => showModalImage(modalIndex - 1);
+
             modalClose.addEventListener('click', closeImageModal);
             imageModal.addEventListener('click', (event) => {
                 if (event.target === imageModal) {
@@ -796,18 +806,62 @@ var gk_isXlsx = false;
                 }
             });
             document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape' && imageModal.classList.contains('show')) {
-                    closeImageModal();
+                if (!imageModal.classList.contains('show')) return;
+                if (event.key === 'Escape') closeImageModal();
+                if (event.key === 'ArrowRight') modalNext();
+                if (event.key === 'ArrowLeft') modalPrev();
+            });
+
+            // Swipe (touch/mouse) navigation inside the zoomed image modal
+            let modalStartX = 0;
+            let modalDragging = false;
+            let modalMoved = false;
+            const modalSwipeThreshold = 40;
+
+            modalImage.addEventListener('pointerdown', (e) => {
+                modalDragging = true;
+                modalMoved = false;
+                modalStartX = e.clientX;
+                try { modalImage.setPointerCapture(e.pointerId); } catch (_) {}
+            });
+
+            modalImage.addEventListener('pointermove', (e) => {
+                if (!modalDragging) return;
+                if (Math.abs(e.clientX - modalStartX) > 5) {
+                    modalMoved = true;
+                }
+            });
+
+            const handleModalPointerUp = (e) => {
+                if (!modalDragging) return;
+                modalDragging = false;
+                try { modalImage.releasePointerCapture(e.pointerId); } catch (_) {}
+                const diffX = e.clientX - modalStartX;
+                if (Math.abs(diffX) > modalSwipeThreshold) {
+                    if (diffX < 0) {
+                        modalNext(); // swipe left -> next image
+                    } else {
+                        modalPrev(); // swipe right -> previous image
+                    }
+                }
+            };
+
+            modalImage.addEventListener('pointerup', handleModalPointerUp);
+            modalImage.addEventListener('pointercancel', handleModalPointerUp);
+
+            // Prevent a swipe from also being interpreted as a click-to-close
+            modalImage.addEventListener('click', (event) => {
+                if (modalMoved) {
+                    event.stopPropagation();
                 }
             });
 
             // Set up click on slides to trigger lightbox
-            carouselTrack.querySelectorAll('.carousel-slide').forEach(slide => {
+            carouselTrack.querySelectorAll('.carousel-slide').forEach((slide, index) => {
                 slide.addEventListener('click', (e) => {
                     // Only open if the user clicked (was not dragging)
                     if (!isMoving) {
-                        const src = slide.getAttribute('data-src');
-                        openImageModal(src);
+                        openImageModal(index);
                     }
                 });
             });
