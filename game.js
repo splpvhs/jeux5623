@@ -775,9 +775,20 @@ var gk_isXlsx = false;
 
             let modalIndex = 0;
 
-            const showModalImage = (index) => {
-                modalIndex = (index + slides.length) % slides.length;
-                modalImage.src = slides[modalIndex];
+            const showModalImage = (index, direction) => {
+                const nextIndex = (index + slides.length) % slides.length;
+                if (!direction) {
+                    modalIndex = nextIndex;
+                    modalImage.src = slides[modalIndex];
+                    return;
+                }
+                const exitClass = direction === 'next' ? 'modal-img-turn-next' : 'modal-img-turn-prev';
+                modalImage.classList.add(exitClass);
+                setTimeout(() => {
+                    modalIndex = nextIndex;
+                    modalImage.src = slides[modalIndex];
+                    modalImage.classList.remove(exitClass);
+                }, 180);
             };
 
             const openImageModal = (index) => {
@@ -796,8 +807,8 @@ var gk_isXlsx = false;
                 }, 300);
             };
 
-            const modalNext = () => showModalImage(modalIndex + 1);
-            const modalPrev = () => showModalImage(modalIndex - 1);
+            const modalNext = () => showModalImage(modalIndex + 1, 'next');
+            const modalPrev = () => showModalImage(modalIndex - 1, 'prev');
 
             modalClose.addEventListener('click', closeImageModal);
             imageModal.addEventListener('click', (event) => {
