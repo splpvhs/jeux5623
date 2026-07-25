@@ -691,7 +691,8 @@ var gk_isXlsx = false;
             };
 
             const setPositionByIndex = () => {
-                currentTranslate = -currentIndex * carouselViewport.clientWidth;
+                const viewportWidth = carouselViewport.clientWidth || 300;
+                currentTranslate = -currentIndex * viewportWidth;
                 carouselTrack.style.transform = `translateX(${currentTranslate}px)`;
                 updateDots();
             };
@@ -699,7 +700,7 @@ var gk_isXlsx = false;
             const goToSlide = (index) => {
                 currentIndex = index;
                 carouselTrack.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                setPositionByIndex();
+                requestAnimationFrame(() => setPositionByIndex());
             };
 
             // Event Listeners for Arrows
