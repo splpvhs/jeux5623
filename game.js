@@ -595,10 +595,12 @@ var gk_isXlsx = false;
             const carouselTrack = document.getElementById('carouselTrack');
             const carouselViewport = document.getElementById('carouselViewport');
 
+            const resolveAssetUrl = (relativePath) => new URL(relativePath, document.baseURI).href;
+
             const slides = [
-                'images/photo1.png',
-                'images/photo2.png',
-                'images/photo3.png'
+                resolveAssetUrl('./images/photo1.png'),
+                resolveAssetUrl('./images/photo2.png'),
+                resolveAssetUrl('./images/photo3.png')
             ];
 
             // Build Carousel DOM with clones for infinite loop
